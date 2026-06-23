@@ -11,12 +11,14 @@ export default function ProductCard({ product, variant = 'default' }) {
   const shadowRef = useRef(null)
   const imgRef = useRef(null)
   const glowRef = useRef(null)
+  const shineRef = useRef(null)
 
   useEffect(() => {
     const card = cardRef.current
     const shadow = shadowRef.current
     const img = imgRef.current
     const glow = glowRef.current
+    const shine = shineRef.current
     if (!card) return
 
     const onMove = (e) => {
@@ -24,15 +26,19 @@ export default function ProductCard({ product, variant = 'default' }) {
       const x = (e.clientX - rect.left) / rect.width - 0.5
       const y = (e.clientY - rect.top) / rect.height - 0.5
 
-      card.style.transform = `perspective(1200px) rotateY(${x * 18}deg) rotateX(${y * -12}deg) translateZ(10px)`
+      card.style.transform = `perspective(1200px) rotateY(${x * 22}deg) rotateX(${y * -16}deg) translateZ(15px)`
       if (shadow) {
-        shadow.style.transform = `translate(${x * 30}px, ${y * 30}px) scale(${1 + Math.abs(x) * 0.2})`
-        shadow.style.opacity = 0.4 + Math.abs(x) * 0.3 + Math.abs(y) * 0.3
+        shadow.style.transform = `translate(${x * 35}px, ${y * 35}px) scale(${1 + Math.abs(x) * 0.25})`
+        shadow.style.opacity = 0.5 + Math.abs(x) * 0.35 + Math.abs(y) * 0.35
       }
-      if (img) img.style.transform = `scale(1.12) translate(${x * -15}px, ${y * -15}px)`
+      if (img) img.style.transform = `scale(1.15) translate(${x * -18}px, ${y * -18}px)`
       if (glow) {
-        glow.style.opacity = 0.6 + Math.abs(x) * 0.4
-        glow.style.transform = `translate(${x * 20}px, ${y * 20}px)`
+        glow.style.opacity = 0.7 + Math.abs(x) * 0.3
+        glow.style.transform = `translate(${x * 25}px, ${y * 25}px)`
+      }
+      if (shine) {
+        shine.style.transform = `translate(${x * 40}px, ${y * 40}px)`
+        shine.style.opacity = Math.abs(x) * 1.5 + Math.abs(y) * 1.5
       }
     }
 
@@ -41,6 +47,7 @@ export default function ProductCard({ product, variant = 'default' }) {
       if (shadow) { shadow.style.transform = 'translate(0,0)'; shadow.style.opacity = 0 }
       if (img) img.style.transform = 'scale(1) translate(0,0)'
       if (glow) { glow.style.opacity = 0; glow.style.transform = 'translate(0,0)' }
+      if (shine) { shine.style.transform = 'translate(0,0)'; shine.style.opacity = 0 }
     }
 
     card.addEventListener('mousemove', onMove)
@@ -65,27 +72,36 @@ export default function ProductCard({ product, variant = 'default' }) {
       >
         <div
           ref={shadowRef}
-          className="absolute -inset-6 z-[-1] rounded-2xl opacity-0 transition-opacity duration-500"
-          style={{ background: 'radial-gradient(ellipse at center, rgba(230,0,0,0.2) 0%, transparent 70%)', filter: 'blur(24px)' }}
+          className="absolute -inset-8 z-[-1] rounded-2xl opacity-0 transition-opacity duration-500"
+          style={{ background: 'radial-gradient(ellipse at center, rgba(230,0,0,0.25) 0%, transparent 70%)', filter: 'blur(30px)' }}
         />
         <div
           ref={glowRef}
-          className="absolute -inset-2 z-[-1] rounded-xl opacity-0 pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(230,0,0,0.1) 0%, transparent 60%)', filter: 'blur(16px)' }}
+          className="absolute -inset-3 z-[-1] rounded-xl opacity-0 pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(230,0,0,0.15) 0%, transparent 60%)', filter: 'blur(20px)' }}
+        />
+        <div
+          ref={shineRef}
+          className="absolute inset-0 z-[1] pointer-events-none opacity-0 transition-opacity duration-300"
+          style={{ background: 'linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.06) 50%, transparent 70%)', mixBlendMode: 'overlay' }}
         />
 
-        <div className={`relative overflow-hidden ${isShowcase ? 'aspect-[3/4]' : 'aspect-square'} bg-charcoal`}>
+        <div className={`relative overflow-hidden ${isShowcase ? 'aspect-[3/4]' : 'aspect-square'} bg-charcoal shimmer-overlay`}>
           <img
             ref={imgRef}
             src={product.image}
             alt={product.name}
             className="w-full h-full object-cover transition-transform duration-700"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-dark/90 via-dark/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
+          <div className="absolute inset-0 bg-gradient-to-t from-dark/95 via-dark/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
+
+          {isShowcase && (
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          )}
 
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleItem(product) }}
-            className="absolute top-4 right-4 p-2.5 rounded-full glass hover:bg-accent/80 transition-all duration-300 z-10"
+            className="absolute top-4 right-4 p-2.5 rounded-full glass hover:bg-accent/80 transition-all duration-300 z-10 hover:scale-110 active:scale-90"
             aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
           >
             <svg viewBox="0 0 24 24" fill={wishlisted ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" className={`w-4 h-4 ${wishlisted ? 'text-accent' : 'text-white/70'}`}>
@@ -94,7 +110,7 @@ export default function ProductCard({ product, variant = 'default' }) {
           </button>
 
           {isShowcase && (
-            <div className="absolute bottom-0 left-0 right-0 p-6 translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+            <div className="absolute bottom-0 left-0 right-0 p-6 translate-y-3 group-hover:translate-y-0 transition-transform duration-500">
               <p className="label-caps text-accent mb-2">{product.category}</p>
               <h3 className="text-2xl md:text-3xl font-display text-white uppercase">{product.name}</h3>
               <p className="text-lg font-display text-white/60 mt-1">${product.price.toFixed(2)}</p>

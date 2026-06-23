@@ -17,24 +17,39 @@ const timeline = [
 
 export default function AboutPage() {
   const quoteRef = useRef(null)
+  const heroImgRef = useRef(null)
+  const pageRef = useRef(null)
 
   useEffect(() => {
-    gsap.fromTo(
-      quoteRef.current,
-      { opacity: 0, y: 30 },
-      {
+    const ctx = gsap.context(() => {
+      ScrollTrigger.create({
+        trigger: heroImgRef.current,
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: 1,
+        onUpdate: (self) => gsap.set(heroImgRef.current, { y: self.progress * -80 }),
+      })
+
+      gsap.fromTo(quoteRef.current, { opacity: 0, y: 30 }, {
         opacity: 1, y: 0, duration: 1, ease: 'power3.out',
-        scrollTrigger: { trigger: quoteRef.current, start: 'top 80%', toggleActions: 'play none none reverse' },
-      }
-    )
+        scrollTrigger: { trigger: quoteRef.current, start: 'top 80%', toggleActions: 'play none none none' },
+      })
+    }, pageRef)
+    return () => ctx.revert()
   }, [])
 
   return (
-    <div className="pt-28 pb-24">
+    <div ref={pageRef} className="pt-28 pb-24">
       <section className="relative h-[60vh] flex items-center justify-center overflow-hidden bg-dark">
-        <img src="https://images.unsplash.com/photo-1459865264687-595d652de67e?w=1920&q=80" alt="Stadium" className="absolute inset-0 w-full h-full object-cover" />
+        <img
+          ref={heroImgRef}
+          src="https://images.unsplash.com/photo-1459865264687-595d652de67e?w=1920&q=80"
+          alt="Stadium"
+          className="absolute inset-0 w-full h-full object-cover will-change-transform"
+        />
         <div className="absolute inset-0 bg-gradient-to-b from-dark/80 via-dark/50 to-dark/80" />
         <div className="absolute inset-0 noise-overlay" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(230,0,0,0.06),transparent_50%)]" />
         <div className="relative z-10 text-center px-6">
           <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }} className="text-5xl md:text-7xl font-display text-white">
             Our Story
@@ -47,9 +62,18 @@ export default function AboutPage() {
 
       <section className="py-32 px-6 md:px-12 max-w-7xl mx-auto">
         <div className="relative">
-          <div className="absolute left-4 md:left-1/2 md:-translate-x-px top-0 bottom-0 w-[1px] bg-white/10" />
+          <div className="absolute left-4 md:left-1/2 md:-translate-x-px top-0 bottom-0 w-[1px]">
+            <div className="h-full bg-gradient-to-b from-transparent via-accent/30 to-transparent" />
+          </div>
           {timeline.map((item, i) => (
-            <motion.div key={item.year} initial={{ opacity: 0, filter: 'blur(6px)', x: i % 2 === 0 ? -20 : 20 }} whileInView={{ opacity: 1, filter: 'blur(0px)', x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: i * 0.12, ease: [0.25, 0.1, 0.25, 1] }} className="relative flex items-start gap-6 mb-16 pl-12 md:pl-0 md:even:flex-row-reverse">
+            <motion.div
+              key={item.year}
+              initial={{ opacity: 0, filter: 'blur(6px)', x: i % 2 === 0 ? -20 : 20 }}
+              whileInView={{ opacity: 1, filter: 'blur(0px)', x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: i * 0.12, ease: [0.25, 0.1, 0.25, 1] }}
+              className="relative flex items-start gap-6 mb-16 pl-12 md:pl-0 md:even:flex-row-reverse"
+            >
               <div className="hidden md:flex flex-1 justify-end pr-12 text-right">
                 <div>
                   <span className="text-2xl font-display text-accent glow-red-text">{item.year}</span>
@@ -77,12 +101,14 @@ export default function AboutPage() {
 
       <section ref={quoteRef} className="py-32 px-6 md:px-12 bg-carbon border-t border-white/5">
         <div className="max-w-7xl mx-auto text-center">
+          <div className="w-12 h-px bg-accent mx-auto mb-12" />
           <blockquote>
             <p className="text-3xl md:text-5xl font-display text-white leading-tight">
               &ldquo;If you have a body, you are an athlete.&rdquo;
             </p>
             <footer className="mt-6 text-xs uppercase tracking-[0.2em] text-accent font-body">— Bill Bowerman</footer>
           </blockquote>
+          <div className="w-12 h-px bg-accent mx-auto mt-12" />
         </div>
       </section>
     </div>

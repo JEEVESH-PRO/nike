@@ -65,7 +65,7 @@ export default function Preloader() {
     }
   }, [])
 
-  if (!mounted) return null
+  if (!mounted) return <div className="fixed inset-0 z-[99999] bg-dark" />
 
   return (
     <AnimatePresence mode="wait">

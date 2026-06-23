@@ -1,16 +1,25 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { gsap } from 'gsap'
 import { useCart } from '@/components/CartProvider'
 import TransitionLink from '@/components/TransitionLink'
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, clearCart, totalItems, subtotal } = useCart()
+  const subtotalRef = useRef(null)
+  const pageRef = useRef(null)
 
   if (items.length === 0) {
     return (
-      <div className="pt-28 pb-24 px-6 md:px-12 text-center">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}>
+      <div className="pt-28 pb-24 px-6 md:px-12 text-center min-h-screen flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+        >
+          <div className="w-16 h-px bg-accent mx-auto mb-8" />
           <span className="text-[10px] uppercase tracking-[0.3em] text-accent font-body">Cart</span>
           <h1 className="text-3xl md:text-4xl font-display mt-3 mb-4 text-white">Your cart is empty</h1>
           <p className="text-sm text-white/50 font-body mb-8">Add some sneakers to get started.</p>
@@ -23,7 +32,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="pt-28 pb-24 px-6 md:px-12">
+    <div ref={pageRef} className="pt-28 pb-24 px-6 md:px-12">
       <div className="max-w-4xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }} className="flex items-center justify-between mb-12">
           <div>
@@ -35,9 +44,17 @@ export default function CartPage() {
           </button>
         </motion.div>
 
-        <div className="space-y-4">
+        <AnimatePresence mode="popLayout">
           {items.map((item, i) => (
-            <motion.div key={item.key} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: i * 0.05 }} className="flex gap-4 p-4 bg-carbon border border-white/5">
+            <motion.div
+              key={item.key}
+              layout
+              initial={{ opacity: 0, y: 10, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, x: -40, scale: 0.95, filter: 'blur(4px)' }}
+              transition={{ duration: 0.3, delay: i * 0.03, ease: [0.25, 0.1, 0.25, 1] }}
+              className="flex gap-4 p-4 bg-carbon border border-white/5 mb-4"
+            >
               <div className="w-20 h-20 bg-charcoal overflow-hidden flex-shrink-0">
                 <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
               </div>
@@ -45,9 +62,24 @@ export default function CartPage() {
                 <h3 className="text-sm font-body font-medium text-white">{item.name}</h3>
                 <p className="text-xs text-white/40 font-body mt-0.5">Size {item.size}</p>
                 <div className="flex items-center gap-3 mt-2">
-                  <button onClick={() => updateQuantity(item.key, item.quantity - 1)} className="w-7 h-7 border border-white/10 text-xs text-white/50 hover:text-white hover:border-white/30 transition-colors">−</button>
-                  <span className="text-sm font-body text-white">{item.quantity}</span>
-                  <button onClick={() => updateQuantity(item.key, item.quantity + 1)} className="w-7 h-7 border border-white/10 text-xs text-white/50 hover:text-white hover:border-white/30 transition-colors">+</button>
+                  <button
+                    onClick={() => {
+                      if (item.quantity <= 1) { removeItem(item.key); return }
+                      updateQuantity(item.key, item.quantity - 1)
+                    }}
+                    className="w-7 h-7 border border-white/10 text-xs text-white/50 hover:text-white hover:border-white/30 transition-all duration-300 active:scale-90"
+                  >
+                    −
+                  </button>
+                  <motion.span key={item.quantity} initial={{ scale: 1.3 }} animate={{ scale: 1 }} className="text-sm font-body text-white min-w-[1.5ch] text-center">
+                    {item.quantity}
+                  </motion.span>
+                  <button
+                    onClick={() => updateQuantity(item.key, item.quantity + 1)}
+                    className="w-7 h-7 border border-white/10 text-xs text-white/50 hover:text-white hover:border-white/30 transition-all duration-300 active:scale-90"
+                  >
+                    +
+                  </button>
                 </div>
               </div>
               <div className="text-right flex-shrink-0">
@@ -58,15 +90,29 @@ export default function CartPage() {
               </div>
             </motion.div>
           ))}
-        </div>
+        </AnimatePresence>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }} className="mt-8 p-8 bg-carbon border border-white/5">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+          className="mt-8 p-8 bg-carbon border border-white/5"
+        >
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-body text-white/60">Subtotal</span>
-            <span className="text-2xl font-display text-white">${subtotal.toFixed(2)}</span>
+            <motion.span
+              ref={subtotalRef}
+              key={subtotal}
+              initial={{ scale: 1.1, color: '#E60000' }}
+              animate={{ scale: 1, color: '#ffffff' }}
+              transition={{ duration: 0.3 }}
+              className="text-2xl font-display text-white"
+            >
+              ${subtotal.toFixed(2)}
+            </motion.span>
           </div>
           <p className="text-xs text-white/30 font-body mb-6">Shipping calculated at checkout</p>
-          <button className="w-full py-3.5 bg-accent text-white text-sm font-body font-medium hover:bg-accent/80 transition-all duration-300 tracking-wider uppercase">
+          <button className="w-full py-3.5 bg-accent text-white text-sm font-body font-medium hover:bg-accent/80 transition-all duration-300 tracking-wider uppercase active:scale-[0.99]">
             Checkout
           </button>
         </motion.div>

@@ -13,19 +13,21 @@ export default function SmoothScrollProvider({ children }) {
   const [lenisInstance, setLenisInstance] = useState(null)
 
   useEffect(() => {
+    let cancelled = false
     let lenis
     let rafId
 
     const init = async () => {
       const Lenis = (await import('lenis')).default
+      if (cancelled) return
       lenis = new Lenis({
-        duration: 0.8,
+        duration: 1.0,
         easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
         orientation: 'vertical',
         gestureOrientation: 'vertical',
         smoothWheel: true,
-        wheelMultiplier: 0.7,
-        touchMultiplier: 1.2,
+        wheelMultiplier: 0.8,
+        touchMultiplier: 1.0,
       })
       setLenisInstance(lenis)
 
@@ -33,7 +35,7 @@ export default function SmoothScrollProvider({ children }) {
 
       const raf = (time) => {
         lenis.raf(time)
-        rafId = requestAnimationFrame(raf)
+        if (!cancelled) rafId = requestAnimationFrame(raf)
       }
       rafId = requestAnimationFrame(raf)
 
@@ -56,6 +58,7 @@ export default function SmoothScrollProvider({ children }) {
     init()
 
     return () => {
+      cancelled = true
       if (lenis) lenis.destroy()
       if (rafId) cancelAnimationFrame(rafId)
     }
