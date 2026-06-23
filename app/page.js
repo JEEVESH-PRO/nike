@@ -6,12 +6,10 @@ import InnovationSplit from '@/components/InnovationSplit'
 import Craftsmanship from '@/components/Craftsmanship'
 import TestimonialFade from '@/components/TestimonialFade'
 import Newsletter from '@/components/Newsletter'
-import ScrollDebugMonitor from '@/components/ScrollDebugMonitor'
 
 export default function Home() {
   return (
     <>
-      <ScrollDebugMonitor />
       <Hero />
       <CampaignStory />
       <FeaturedProducts />
