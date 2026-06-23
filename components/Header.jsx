@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCart } from './CartProvider'
 import { useWishlist } from './WishlistProvider'
 import TransitionLink from './TransitionLink'
 import { navLinks } from '@/lib/constants'
+import { useLenis } from './LenisContext'
 
 const sections = [
   { id: 'hero', label: 'Home' },
@@ -16,6 +18,8 @@ const sections = [
 ]
 
 export default function Header() {
+  const pathname = usePathname()
+  const isHome = pathname === '/'
   const [atTop, setAtTop] = useState(true)
   const [hidden, setHidden] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -26,13 +30,16 @@ export default function Header() {
   const indicatorRef = useRef(null)
   const { totalItems } = useCart()
   const { items: wishlisted } = useWishlist()
+  const { lenis } = useLenis()
 
   useEffect(() => {
     const sectionEls = document.querySelectorAll('[data-section]')
     let ticking = false
 
+    const getScrollY = () => (lenis ? lenis.scroll : window.scrollY)
+
     const onScroll = () => {
-      const y = window.scrollY
+      const y = getScrollY()
       const dh = document.documentElement.scrollHeight - window.innerHeight
       const down = y > lastScroll.current
       lastScroll.current = y
@@ -58,10 +65,15 @@ export default function Header() {
       }
     }
 
-    window.addEventListener('scroll', onScroll, { passive: true })
+    if (lenis) lenis.on('scroll', onScroll)
+    else window.addEventListener('scroll', onScroll, { passive: true })
     onScroll()
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+
+    return () => {
+      if (lenis) lenis.off('scroll', onScroll)
+      else window.removeEventListener('scroll', onScroll)
+    }
+  }, [lenis])
 
   useEffect(() => {
     if (menuOpen) document.body.style.overflow = 'hidden'
@@ -102,7 +114,10 @@ export default function Header() {
 
   const scrollToSection = (id) => {
     const el = document.querySelector(`[data-section="${id}"]`)
-    if (el) el.scrollIntoView({ behavior: 'smooth' })
+    if (el) {
+      if (lenis) lenis.scrollTo(el, { offset: -100, duration: 1.2 })
+      else el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
     setMenuOpen(false)
   }
 
@@ -112,17 +127,17 @@ export default function Header() {
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: hidden ? -120 : 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
-        className={`fixed top-4 md:top-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] md:w-[calc(100%-4rem)] max-w-6xl rounded-2xl transition-all duration-700 ${
+        className={`fixed top-3 sm:top-4 md:top-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-1.5rem)] sm:w-[calc(100%-2rem)] md:w-[calc(100%-4rem)] max-w-6xl rounded-xl sm:rounded-2xl transition-all duration-700 safe-top ${
           atTop ? 'glass-float' : 'glass-premium glow-white'
         }`}
       >
-        <div className="flex items-center justify-between px-5 md:px-8 py-3.5 md:py-4">
+        <div className="flex items-center justify-between px-4 sm:px-5 md:px-8 py-3 sm:py-3.5 md:py-4">
           <TransitionLink href="/" className="flex items-center gap-2.5 group z-10" data-cursor="view">
             <img src="/images/nike-logo.svg" alt="Nike" className="h-7 w-auto brightness-0 invert transition-opacity duration-300 group-hover:opacity-60" />
             <span className="hidden sm:inline text-sm font-condensed font-bold tracking-[0.15em] text-white uppercase">Nike</span>
           </TransitionLink>
 
-          <nav ref={navRef} onMouseMove={onNavMove} onMouseLeave={onNavLeave} className="hidden lg:flex items-center gap-8 relative">
+          <nav ref={navRef} onMouseMove={onNavMove} onMouseLeave={onNavLeave} className={`${isHome ? 'hidden lg:flex' : 'hidden'} items-center gap-8 relative`}>
             {sections.map((s) => (
               <button
                 key={s.id}
@@ -165,7 +180,7 @@ export default function Header() {
               )}
             </TransitionLink>
 
-            <button onClick={() => setMenuOpen(!menuOpen)} className="flex flex-col items-center justify-center w-8 h-8 group" aria-label="Menu">
+            <button onClick={() => setMenuOpen(!menuOpen)} className="lg:hidden flex flex-col items-center justify-center w-10 h-10 -mr-1 group" aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen}>
               <span className={`block w-5 h-[1.5px] bg-white/60 group-hover:bg-white transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-[3.5px]' : ''}`} />
               <span className={`block w-5 h-[1.5px] bg-white/60 group-hover:bg-white mt-1.5 transition-all duration-300 ${menuOpen ? 'opacity-0 scale-0' : ''}`} />
               <span className={`block w-5 h-[1.5px] bg-white/60 group-hover:bg-white mt-1.5 transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-[3.5px]' : ''}`} />
@@ -193,7 +208,10 @@ export default function Header() {
 
             <div className="relative z-10 flex-1 flex flex-col justify-center px-8 md:px-16">
               <nav className="space-y-2">
-                {[...sections, ...navLinks.filter((l) => !sections.find((s) => s.label === l.label))].map((item, i) => (
+                {(isHome
+                  ? [...sections, ...navLinks.filter((l) => !sections.find((s) => s.label === l.label))]
+                  : navLinks
+                ).map((item, i) => (
                   <motion.div
                     key={item.label || item.id}
                     initial={{ opacity: 0, x: -40, filter: 'blur(8px)' }}

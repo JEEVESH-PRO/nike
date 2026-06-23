@@ -24,14 +24,14 @@ export default function TestimonialFade() {
   }, [])
 
   useEffect(() => {
-    gsap.fromTo(sectionRef.current, { opacity: 0, y: 60, filter: 'blur(8px)' }, {
-      opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.2, ease: 'power3.out',
-      scrollTrigger: { trigger: sectionRef.current, start: 'top 80%', toggleActions: 'play none none reverse' },
-    })
+      gsap.fromTo(sectionRef.current, { opacity: 0, y: 50 }, {
+        opacity: 1, y: 0, duration: 1, ease: 'power3.out',
+        scrollTrigger: { trigger: sectionRef.current, start: 'top 85%', toggleActions: 'play none none none' },
+      })
   }, [])
 
   return (
-    <section ref={sectionRef} data-section="voices" className="relative py-32 md:py-40 px-6 md:px-12 bg-dark overflow-hidden">
+    <section ref={sectionRef} data-section="voices" className="relative pt-16 pb-24 md:py-32 px-4 sm:px-6 md:px-12 bg-dark overflow-hidden -mt-px">
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(230,0,0,0.04),transparent_60%)]" />
 

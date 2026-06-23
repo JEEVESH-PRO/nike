@@ -29,9 +29,9 @@ export default function InnovationSplit() {
         },
       })
 
-      gsap.fromTo(cardsRef.current?.children, { y: 80, opacity: 0, filter: 'blur(8px)' }, {
-        y: 0, opacity: 1, filter: 'blur(0px)', duration: 1, stagger: 0.15, ease: 'power3.out',
-        scrollTrigger: { trigger: cardsRef.current, start: 'top 80%', toggleActions: 'play none none reverse' },
+      gsap.fromTo(cardsRef.current?.children, { y: 60, opacity: 0 }, {
+        y: 0, opacity: 1, duration: 0.9, stagger: 0.12, ease: 'power3.out',
+        scrollTrigger: { trigger: cardsRef.current, start: 'top 85%', toggleActions: 'play none none none' },
       })
     }, sectionRef)
 
@@ -39,7 +39,7 @@ export default function InnovationSplit() {
   }, [])
 
   return (
-    <section ref={sectionRef} data-section="innovation" className="relative py-32 md:py-40 px-6 md:px-12 bg-carbon overflow-hidden">
+    <section ref={sectionRef} data-section="innovation" className="relative py-20 sm:py-32 md:py-40 px-4 sm:px-6 md:px-12 bg-carbon overflow-hidden">
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(230,0,0,0.05),transparent_50%)]" />
 

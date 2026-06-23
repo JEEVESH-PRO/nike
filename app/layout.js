@@ -14,6 +14,13 @@ export const metadata = {
   description: 'A cinematic brand experience. Every stitch, considered. Engineered for movement.',
 }
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  themeColor: '#050505',
+}
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en">

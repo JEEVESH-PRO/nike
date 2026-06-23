@@ -29,8 +29,8 @@ export default function ShopPage() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.fromTo(heroRef.current?.children, { y: 60, opacity: 0, filter: 'blur(10px)' }, {
-        y: 0, opacity: 1, filter: 'blur(0px)', duration: 1, stagger: 0.15, ease: 'power3.out',
+      gsap.fromTo(heroRef.current?.children, { y: 50, opacity: 0 }, {
+        y: 0, opacity: 1, duration: 0.9, stagger: 0.12, ease: 'power3.out',
       })
     })
     return () => ctx.revert()

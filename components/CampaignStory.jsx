@@ -34,43 +34,65 @@ export default function CampaignStory() {
   const sectionRef = useRef(null)
   const pinRef = useRef(null)
   const trackRef = useRef(null)
+  const mobileStackRef = useRef(null)
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const track = trackRef.current
-      const totalWidth = track.scrollWidth - window.innerWidth
+      ScrollTrigger.matchMedia({
+        '(min-width: 768px)': () => {
+          const track = trackRef.current
+          if (!track) return
+          const totalWidth = track.scrollWidth - window.innerWidth
 
-      gsap.to(track, {
-        x: -totalWidth,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top top',
-          end: () => `+=${totalWidth}`,
-          pin: pinRef.current,
-          scrub: 1,
+          // #region agent log
+          fetch('http://127.0.0.1:7558/ingest/3173c7c3-79db-4c24-80a1-6a04e646ce45',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6afc59'},body:JSON.stringify({sessionId:'6afc59',location:'CampaignStory.jsx:desktop',message:'Desktop horizontal story scroll',data:{totalWidth},timestamp:Date.now(),runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
+          // #endregion
+
+          const scrollTween = gsap.to(track, {
+            x: -totalWidth,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: 'top top',
+              end: () => `+=${totalWidth}`,
+              pin: pinRef.current,
+              scrub: 0.6,
+              anticipatePin: 1,
+              invalidateOnRefresh: true,
+            },
+          })
+
+          track.querySelectorAll('.story-panel').forEach((panel) => {
+            const text = panel.querySelector('.story-text')
+            const img = panel.querySelector('.story-image')
+            const num = panel.querySelector('.story-num')
+
+            gsap.fromTo(text, { opacity: 0, x: 40 }, {
+              opacity: 1, x: 0, duration: 0.8, ease: 'power2.out',
+              scrollTrigger: { trigger: panel, containerAnimation: scrollTween, start: 'left 80%', toggleActions: 'play none none none' },
+            })
+
+            gsap.fromTo(img, { scale: 1.08, opacity: 0.85 }, {
+              scale: 1, opacity: 1, duration: 0.8, ease: 'power2.out',
+              scrollTrigger: { trigger: panel, containerAnimation: scrollTween, start: 'left 85%', toggleActions: 'play none none none' },
+            })
+
+            gsap.fromTo(num, { opacity: 0, y: 24 }, {
+              opacity: 1, y: 0, duration: 0.6, ease: 'power2.out',
+              scrollTrigger: { trigger: panel, containerAnimation: scrollTween, start: 'left 80%', toggleActions: 'play none none none' },
+            })
+          })
         },
-      })
+        '(max-width: 767px)': () => {
+          // #region agent log
+          fetch('http://127.0.0.1:7558/ingest/3173c7c3-79db-4c24-80a1-6a04e646ce45',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6afc59'},body:JSON.stringify({sessionId:'6afc59',location:'CampaignStory.jsx:mobile',message:'Mobile vertical story (no pin)',data:{panelCount:mobileStackRef.current?.children?.length||0},timestamp:Date.now(),runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
+          // #endregion
 
-      track.querySelectorAll('.story-panel').forEach((panel) => {
-        const text = panel.querySelector('.story-text')
-        const img = panel.querySelector('.story-image')
-        const num = panel.querySelector('.story-num')
-
-        gsap.fromTo(text, { opacity: 0, x: 50, filter: 'blur(6px)' }, {
-          opacity: 1, x: 0, filter: 'blur(0px)', duration: 0.8, ease: 'power2.out',
-          scrollTrigger: { trigger: panel, start: 'left 80%', toggleActions: 'play none none none' },
-        })
-
-        gsap.fromTo(img, { scale: 1.2, filter: 'blur(4px)' }, {
-          scale: 1, filter: 'blur(0px)', duration: 0.8, ease: 'power2.out',
-          scrollTrigger: { trigger: panel, start: 'left 85%', toggleActions: 'play none none none' },
-        })
-
-        gsap.fromTo(num, { opacity: 0, y: 30 }, {
-          opacity: 1, y: 0, duration: 0.6, ease: 'power2.out',
-          scrollTrigger: { trigger: panel, start: 'left 80%', toggleActions: 'play none none none' },
-        })
+          gsap.fromTo(mobileStackRef.current?.children, { y: 40, opacity: 0 }, {
+            y: 0, opacity: 1, duration: 0.7, stagger: 0.15, ease: 'power3.out',
+            scrollTrigger: { trigger: mobileStackRef.current, start: 'top 85%', toggleActions: 'play none none none' },
+          })
+        },
       })
     }, sectionRef)
 
@@ -78,8 +100,29 @@ export default function CampaignStory() {
   }, [])
 
   return (
-    <section ref={sectionRef} data-section="story" className="relative bg-carbon">
-      <div ref={pinRef} className="relative h-screen overflow-hidden">
+    <section ref={sectionRef} data-section="story" className="relative bg-carbon overflow-hidden">
+      <div className="px-4 sm:px-6 md:px-12 pt-16 pb-4 md:hidden">
+        <span className="label-caps text-accent">Brand Story</span>
+        <h2 className="headline-lg text-white mt-2">The Movement</h2>
+      </div>
+
+      <div ref={mobileStackRef} className="md:hidden px-4 sm:px-6 pb-16 space-y-12">
+        {scenes.map((scene) => (
+          <article key={scene.num} className="story-panel-mobile">
+            <div className="relative aspect-[4/5] overflow-hidden mb-6">
+              <img src={scene.image} alt={scene.title} className="w-full h-full object-cover" loading="lazy" />
+              <div className="absolute inset-0 bg-gradient-to-t from-carbon/70 via-transparent to-transparent" />
+            </div>
+            <span className="block text-5xl font-display text-white/10 mb-3">{scene.num}</span>
+            <p className="label-caps text-accent mb-2">{scene.subtitle}</p>
+            <h3 className="text-3xl font-display text-white leading-none mb-4">{scene.title}</h3>
+            <p className="text-sm text-white/50 font-body leading-relaxed">{scene.body}</p>
+            <div className="w-16 h-px bg-accent mt-6" />
+          </article>
+        ))}
+      </div>
+
+      <div ref={pinRef} className="relative hidden md:block h-screen overflow-hidden">
         <div className="absolute top-12 left-6 md:left-12 z-20">
           <span className="label-caps text-accent">Brand Story</span>
           <h2 className="headline-lg text-white mt-2">The Movement</h2>
@@ -89,22 +132,17 @@ export default function CampaignStory() {
           {scenes.map((scene) => (
             <div
               key={scene.num}
-              className="story-panel relative flex-shrink-0 w-[90vw] md:w-[80vw] lg:w-[70vw] h-[70vh] flex flex-col md:flex-row gap-8 md:gap-16 items-center px-4 md:px-8"
+              className="story-panel relative flex-shrink-0 w-[80vw] lg:w-[70vw] h-[70vh] flex flex-row gap-16 items-center px-8"
             >
-              <div className="story-text flex-1 order-2 md:order-1">
+              <div className="story-text flex-1">
                 <span className="story-num block text-6xl md:text-8xl font-display text-white/10 mb-4">{scene.num}</span>
                 <p className="label-caps text-accent mb-3">{scene.subtitle}</p>
                 <h3 className="text-4xl md:text-6xl font-display text-white leading-none mb-6">{scene.title}</h3>
                 <p className="text-sm md:text-base text-white/50 font-body leading-relaxed max-w-md">{scene.body}</p>
                 <div className="w-20 h-px bg-accent mt-8" />
               </div>
-              <div className="story-image relative flex-1 order-1 md:order-2 aspect-[4/5] md:aspect-[3/4] overflow-hidden w-full max-w-lg">
-                <img
-                  src={scene.image}
-                  alt={scene.title}
-                  className="w-full h-full object-cover"
-                  data-cursor="image"
-                />
+              <div className="story-image relative flex-1 aspect-[3/4] overflow-hidden w-full max-w-lg">
+                <img src={scene.image} alt={scene.title} className="w-full h-full object-cover" loading="lazy" />
                 <div className="absolute inset-0 bg-gradient-to-t from-carbon/60 via-transparent to-transparent" />
                 <div className="absolute inset-0 border border-white/5" />
               </div>

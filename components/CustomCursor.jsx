@@ -1,13 +1,10 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
-
-function isTouchDevice() {
-  if (typeof window === 'undefined') return false
-  return 'ontouchstart' in window || navigator.maxTouchPoints > 0
-}
+import { useEffect, useRef, useState } from 'react'
+import { isTouchDevice } from '@/lib/device'
 
 export default function CustomCursor() {
+  const [ready, setReady] = useState(false)
   const dotRef = useRef(null)
   const ringRef = useRef(null)
   const mouse = useRef({ x: 0, y: 0 })
@@ -17,7 +14,11 @@ export default function CustomCursor() {
   const rafId = useRef(null)
 
   useEffect(() => {
-    if (isTouchDevice()) return
+    setReady(true)
+  }, [])
+
+  useEffect(() => {
+    if (!ready || isTouchDevice()) return
 
     const dot = dotRef.current
     const ring = ringRef.current
@@ -113,9 +114,9 @@ export default function CustomCursor() {
       document.body.removeEventListener('mouseout', onMouseOut)
       if (rafId.current) cancelAnimationFrame(rafId.current)
     }
-  }, [])
+  }, [ready])
 
-  if (isTouchDevice()) return null
+  if (!ready || isTouchDevice()) return null
 
   return (
     <>

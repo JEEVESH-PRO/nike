@@ -13,9 +13,9 @@ export default function Newsletter() {
   const formRef = useRef(null)
 
   useEffect(() => {
-    gsap.fromTo(sectionRef.current, { opacity: 0, y: 60, filter: 'blur(8px)' }, {
-      opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.2, ease: 'power3.out',
-      scrollTrigger: { trigger: sectionRef.current, start: 'top 80%', toggleActions: 'play none none reverse' },
+    gsap.fromTo(sectionRef.current, { opacity: 0, y: 50 }, {
+      opacity: 1, y: 0, duration: 1, ease: 'power3.out',
+      scrollTrigger: { trigger: sectionRef.current, start: 'top 85%', toggleActions: 'play none none none' },
     })
   }, [])
 
@@ -28,7 +28,7 @@ export default function Newsletter() {
   }
 
   return (
-    <section ref={sectionRef} data-section="drop" className="relative py-32 md:py-40 px-6 md:px-12 bg-carbon overflow-hidden">
+    <section ref={sectionRef} data-section="drop" className="relative py-24 md:py-32 px-4 sm:px-6 md:px-12 bg-carbon overflow-hidden -mt-px">
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(230,0,0,0.06),transparent_50%)]" />
 

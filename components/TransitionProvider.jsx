@@ -14,7 +14,10 @@ export default function TransitionProvider({ children }) {
   useEffect(() => {
     if (isFirst.current) {
       isFirst.current = false
-      gsap.fromTo(contentRef.current, { opacity: 0, y: 30, filter: 'blur(8px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1, ease: 'power3.out', delay: 0.2 })
+      // #region agent log
+      fetch('http://127.0.0.1:7558/ingest/3173c7c3-79db-4c24-80a1-6a04e646ce45',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6afc59'},body:JSON.stringify({sessionId:'6afc59',location:'TransitionProvider.jsx:firstLoad',message:'First load content fade starting',data:{pathname},timestamp:Date.now(),runId:'post-fix',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
+      gsap.fromTo(contentRef.current, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.1 })
       return
     }
 

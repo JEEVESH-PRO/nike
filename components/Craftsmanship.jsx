@@ -14,19 +14,23 @@ export default function Craftsmanship() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      ScrollTrigger.create({
-        trigger: sectionRef.current,
-        start: 'top bottom',
-        end: 'bottom top',
-        scrub: 1,
-        onUpdate: (self) => {
-          gsap.set(imageRef.current, { scale: 1 + self.progress * 0.15, y: self.progress * -40 })
+      ScrollTrigger.matchMedia({
+        '(min-width: 768px)': () => {
+          ScrollTrigger.create({
+            trigger: sectionRef.current,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 0.6,
+            onUpdate: (self) => {
+              gsap.set(imageRef.current, { scale: 1 + self.progress * 0.12, y: self.progress * -30 })
+            },
+          })
         },
       })
 
-      gsap.fromTo(textRef.current?.children, { y: 60, opacity: 0, filter: 'blur(10px)' }, {
-        y: 0, opacity: 1, filter: 'blur(0px)', duration: 1.2, stagger: 0.2, ease: 'power3.out',
-        scrollTrigger: { trigger: textRef.current, start: 'top 75%', toggleActions: 'play none none reverse' },
+      gsap.fromTo(textRef.current?.children, { y: 50, opacity: 0 }, {
+        y: 0, opacity: 1, duration: 1, stagger: 0.15, ease: 'power3.out',
+        scrollTrigger: { trigger: textRef.current, start: 'top 80%', toggleActions: 'play none none none' },
       })
     }, sectionRef)
 
@@ -34,7 +38,7 @@ export default function Craftsmanship() {
   }, [])
 
   return (
-    <section ref={sectionRef} data-section="craft" className="relative h-[90vh] md:h-screen overflow-hidden">
+    <section ref={sectionRef} data-section="craft" className="relative min-h-[70vh] md:min-h-screen overflow-hidden">
       <img
         ref={imageRef}
         src="https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=1920&q=80"
